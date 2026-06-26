@@ -1,8 +1,8 @@
-from services.ollama_client import OllamaClient
+from engine.inference_engine import InferenceEngine
 
-client = OllamaClient()
+engine = InferenceEngine()
 
-print("Offline AI Assistant")
+print("Offline SLM Optimizer")
 print("Type exit to quit")
 
 while True:
@@ -12,6 +12,6 @@ while True:
     if prompt.lower() == "exit":
         break
 
-    answer = client.generate(prompt)
+    answer = engine.process(prompt)
 
     print("\nAI :", answer)
