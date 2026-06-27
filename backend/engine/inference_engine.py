@@ -1,5 +1,6 @@
 from services.ollama_client import OllamaClient
 from optimizer.prompt_optimizer import PromptOptimizer
+from optimizer.context_selector import ContextSelector
 from memory.conversation_memory import ConversationMemory
 
 
@@ -13,12 +14,26 @@ class InferenceEngine:
 
         self.memory = ConversationMemory()
 
+        self.selector = ContextSelector()
+
+    def build_context(self, selected_messages):
+
+        context = ""
+
+        for message in selected_messages:
+
+            context += f"{message['role']}: {message['content']}\n"
+
+        return context
+
     def process(self, prompt):
 
-        # Get previous conversation
-        context = self.memory.get_context()
+        history = self.memory.get_history()
 
-        # Build the complete prompt
+        selected = self.selector.select(history)
+
+        context = self.build_context(selected)
+
         full_prompt = f"""
 Previous Conversation:
 
@@ -29,21 +44,23 @@ Current Question:
 {prompt}
 """
 
-        # Optimize prompt
         optimized_prompt = self.optimizer.optimize(full_prompt)
 
-        # Generate answer
         response = self.client.generate(optimized_prompt)
 
-        # Save conversation
         self.memory.add_message("User", prompt)
+
         self.memory.add_message("Assistant", response)
 
         return response
 
     def process_stream(self, prompt):
 
-        context = self.memory.get_context()
+        history = self.memory.get_history()
+
+        selected = self.selector.select(history)
+
+        context = self.build_context(selected)
 
         full_prompt = f"""
 Previous Conversation:
