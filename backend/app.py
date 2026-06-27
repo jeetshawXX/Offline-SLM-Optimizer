@@ -1,17 +1,9 @@
-from engine.inference_engine import InferenceEngine
+from fastapi import FastAPI
+from api.routes import router
 
-engine = InferenceEngine()
+app = FastAPI(
+    title="Offline SLM Optimizer",
+    version="1.0"
+)
 
-print("Offline SLM Optimizer")
-print("Type exit to quit")
-
-while True:
-
-    prompt = input("\nYou : ")
-
-    if prompt.lower() == "exit":
-        break
-
-    answer = engine.process(prompt)
-
-    print("\nAI :", answer)
+app.include_router(router)
